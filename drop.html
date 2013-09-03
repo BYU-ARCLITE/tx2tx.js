@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" media="all" />
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" media="all" />
+		<script type="text/javascript" src="js/xmlToJson.js"></script>
+		<script type="text/javascript" src="js/Ractive.min.js"></script>
+		<script type="text/javascript" src="js/uuid.js"></script>
+		<script type="text/javascript" src="js/regconf.js"></script>
+		<script type="text/javascript" src="js/TextToArray.js"></script>
+		<script type="text/javascript" src="js/t2t.js"></script>
+		<style type="text/css">
+			.dragover {
+				border: "2px dotted black";		
+			}
+			.textInput {
+				height: 100px;
+				width: 150px;
+				box-shadow: inset 0 0 3px #000;
+			}
+			.textInput:before {
+				content: "Paste or Drop text here.";
+			}
+		</style>
+	</select>			
+</head>
+<body>
+	<div id="container"></div>
+	<script id="textQueryTemplate" type="text/ractive">
+		{{^chosen}}
+			<form action="" proxy-submit="setforms">
+				<label for="count">How many Texts: </label>
+				<input value="{{number}}" name="count" type="number"/>	
+				<button proxy-click="setforms" class="btn btn-primary">Go</button>
+			</form>
+		{{/chosen}}
+		{{#textform}}
+			<div id="form{{id}}"></div>	
+		{{/textform}}
+	</script>
+	<script id="textFormTemplate" type="text/ractive">
+		<label for="{{la}}">Lanuage: </label>
+		<select id="{{la}}" value="{{lang}}">
+			{{#langs}}
+			<option value="{{.}}">{{.}}</option>
+			{{/langs}}
+		</select>
+
+		{{^complete}}
+			<div id="{{box}}" proxy-click="clear" contenteditable="true" class="textInput" tabindex="1"></div>
+		{{/complete}}
+		{{#complete}}
+		<div>
+		<i class="icon-bolt icon-4x"></i>
+		</div>
+		{{/complete}}
+	</script>
+	<script id="humanAlignerTemplate" type="text/ractive">
+			<div class="btn-group">
+				{{^showParagraphs}}
+					<div class="btn" proxy-click="sentenceUp" title="Choose top sentence"><i class="icon-arrow-up"></i></div>
+					<div class="btn" proxy-click="sentenceDown" title="Choose bontom sentence"><i class="icon-arrow-down"></i></div>
+				{{/showParagraphs}}
+				<div class="btn" proxy-click="join" title="Join with above sentence"><i class="icon-double-angle-up"></i></div>
+				<div class="btn" proxy-click="split" title="Highlight chunk to split sentence"><i class="icon-exchange"></i></div>
+
+				{{#showParagraphs}}
+					<div class="btn" proxy-click="joinPg" title="Join with above paragraph"><i class="icon-resize-small"></i></div>
+					<div class="btn" proxy-click="splitPg" title="split paragraph at sentence"><i class="icon-resize-full"></i></div>
+				{{/showParagraphs}}
+				{{#completed}}
+					<div proxy-click="done" class="btn btn-primary" title="Finish"><i class="icon-check"></i></div>
+				{{/completed}}
+			</div>
+			<div class="row-fluid">
+				{{#texts:lIndex}}
+					{{>txt}}
+				{{/texts}}
+			</div>
+
+			<!-- {{>txt}} -->
+				<div class="span{{12/texts.length}}">
+					<ul class="unstyled">
+						{{#showParagraphs}}
+							{{#text:tIndex}}
+								{{>pgr}}
+							{{/text}}
+						{{/showParagraphs}}
+						{{^showParagraphs}}
+							{{#text[pIndex]:sIndex}}
+								{{>sentence}}
+							{{/text}}
+						{{/showParagraphs}}
+					</ul>
+				</div>
+			<!-- {{/txt}} -->
+
+			<!-- {{>pgr}} -->
+				<li class="{{color}}" >
+					{{#.:sIndex}}
+					<span id="{{lIndex}}-{{tIndex}}-{{sIndex}}" on-mouseup="handleParagraph" >{{.}}</span>
+					<i class="icon-ellipsis-vertical"></i>
+					{{/.}}
+					<i class="icon-caret-down"></i>
+				</li>
+			<!-- {{/pgr}} -->
+
+			<!-- {{>sentence}} -->
+				<li style="background-color:{{shortP == lIndex && (shortIndex == sIndex || shortIndexp == sIndex)?"yellow":longP == lIndex && sIndex == longIndex?"green":""}};margin-bottom:5px">
+					<i class="icon-arrow{{shortP == lIndex && shortIndex == sIndex?"-up":shortP == lIndex && shortIndexp == sIndex? "-down" : ""}}"></i>
+					<span id="{{lIndex}}-{{pIndex}}-{{sIndex}}" on-mouseup="handleSentence">{{.}}</span>
+				</li>
+			<!-- {{/sentence}} -->
+	</script>
+
+	<script type="text/javascript">
+		var texttotext = new TextToText('container',function(txt){
+			console.log(txt);
+		});
+	</script>
+
+</body>
+</html>
